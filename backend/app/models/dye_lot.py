@@ -9,6 +9,7 @@ from app.database import Base
 if TYPE_CHECKING:
     from app.models.vat import Vat
     from app.models.fastness_check import FastnessCheck
+    from app.models.redye_ticket import RedyeTicket
 
 
 class DyeLot(Base):
@@ -24,4 +25,7 @@ class DyeLot(Base):
     vat: Mapped["Vat"] = relationship("Vat", back_populates="dye_lots")
     fastness_checks: Mapped[List["FastnessCheck"]] = relationship(
         "FastnessCheck", back_populates="dye_lot", cascade="all, delete-orphan"
+    )
+    redye_tickets: Mapped[List["RedyeTicket"]] = relationship(
+        "RedyeTicket", back_populates="dye_lot", cascade="all, delete-orphan"
     )

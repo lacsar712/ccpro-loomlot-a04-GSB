@@ -34,6 +34,9 @@
     return `${v.vatCode}（${VAT_STATUS[v.status] || v.status}）`;
   }
 
+  $: selectedVat = vats.find((v) => String(v.id) === form.vatId) || null;
+  $: selectedLocked = !!selectedVat?.hasOpenRedye;
+
   async function save() {
     error = '';
     try {
@@ -86,7 +89,7 @@
 </script>
 
 <h1 class="page-title">染程</h1>
-<p class="page-sub">仅 ready / dyeing 染缸可开缸；提交后染缸自动变为染色中。</p>
+<p class="page-sub">仅 ready / dyeing 染缸可开缸；挂未结案回修复染单的染缸在结案前禁止新开染程。</p>
 
 <div class="panel" style="margin-bottom:1rem;">
   <div class="form-grid">
@@ -105,6 +108,9 @@
     <label>开始时间 <input type="datetime-local" bind:value={form.startedAt} /></label>
     <label>操作员 <input bind:value={form.operatorName} /></label>
   </div>
+  {#if selectedLocked}
+    <p class="err lock-tip">该染缸挂有未结案回修复染单，结案前禁止新建染程。</p>
+  {/if}
   <div class="toolbar">
     <button class="btn" type="button" on:click={save}>{editing ? '保存修改' : '新建染程'}</button>
     {#if editing}
@@ -124,6 +130,7 @@
         <th>布料 kg</th>
         <th>开始</th>
         <th>操作员</th>
+        <th>回修复染</th>
         <th></th>
       </tr>
     </thead>
@@ -136,6 +143,13 @@
           <td>{row.fabricKg}</td>
           <td>{new Date(row.startedAt).toLocaleString()}</td>
           <td>{row.operatorName}</td>
+          <td>
+            {#if row.hasOpenRedye}
+              <span class="badge redye">未结案复染</span>
+            {:else}
+              <span class="muted">—</span>
+            {/if}
+          </td>
           <td class="row-actions">
             <button class="btn ghost small" type="button" on:click={() => startEdit(row)}>编辑</button>
             <button class="btn danger small" type="button" on:click={() => remove(row.id)}>删除</button>

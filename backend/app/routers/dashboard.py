@@ -12,6 +12,7 @@ from app.models.fastness_check import FastnessCheck
 from app.models.user import User
 from app.models.vat import Vat
 from app.schemas.dashboard import DashboardStats
+from app.services import redye
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -38,4 +39,6 @@ def get_stats(
             .scalar()
             or 0
         ),
+        # 与复染单列表、染缸/染程拦截标记共用 redye 服务的同一口径，不另算
+        open_redye_count=redye.count_open_tickets(db),
     )

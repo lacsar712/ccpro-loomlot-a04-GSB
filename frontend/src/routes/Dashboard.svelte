@@ -44,17 +44,34 @@
       <div class="n">{stats.checksLast24h}</div>
       <div class="l">近 24 时抽检</div>
     </div>
+    <div class="stat redye-stat">
+      <div class="n">{stats.openRedyeCount}</div>
+      <div class="l">未结案复染</div>
+    </div>
   </div>
 {/if}
 
 <div class="panel">
   <p style="margin:0 0 0.75rem;color:var(--indigo-mist);font-size:0.9rem;">
-    业务约束：仅当染缸为 <strong>ready</strong> 或 <strong>dyeing</strong> 时可新建染程；新建后染缸自动变为 dyeing。排液可用染缸「完成排液」动作。
+    业务约束：仅当染缸为 <strong>ready</strong> 或 <strong>dyeing</strong> 时可新建染程；存在
+    <strong>未结案回修复染单</strong>的染缸在结案前禁止新开染程（409）。复染结案须原染程双检色牢度、最新耐洗等级不低于上一条，且仅主管可结案。
   </p>
   <div class="toolbar">
     <a class="btn" href="/houses" use:link>进入染坊</a>
     <a class="btn ghost" href="/vats" use:link>管理染缸</a>
     <a class="btn ghost" href="/lots" use:link>登记染程</a>
     <a class="btn ghost" href="/checks" use:link>色牢度抽检</a>
+    <a class="btn ghost" href="/redye" use:link>回修复染</a>
   </div>
 </div>
+
+<style>
+  .redye-stat {
+    border-color: rgba(212, 101, 122, 0.5);
+    background: linear-gradient(145deg, rgba(122, 45, 66, 0.45), rgba(60, 20, 34, 0.6));
+  }
+
+  .redye-stat .n {
+    color: #f2c4cd;
+  }
+</style>

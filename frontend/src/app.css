@@ -210,6 +210,17 @@ th {
   border-color: rgba(224, 168, 74, 0.45);
 }
 
+.badge.redye {
+  color: var(--danger);
+  border-color: rgba(212, 101, 122, 0.55);
+  background: rgba(212, 101, 122, 0.14);
+}
+
+.muted {
+  color: var(--indigo-mist);
+  opacity: 0.55;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

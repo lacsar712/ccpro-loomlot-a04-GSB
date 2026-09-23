@@ -10,6 +10,7 @@ from app.models.dye_house import DyeHouse
 from app.models.user import User
 from app.models.vat import Vat
 from app.schemas.vat import VatCreate, VatUpdate, VatOut
+from app.services import redye
 
 router = APIRouter(prefix="/api/vats", tags=["vats"])
 
@@ -23,7 +24,11 @@ def list_vats(
     q = db.query(Vat)
     if dye_house_id is not None:
         q = q.filter(Vat.dye_house_id == dye_house_id)
-    return q.order_by(Vat.id).all()
+    rows = q.order_by(Vat.id).all()
+    open_vat_ids = redye.open_ticket_vat_ids(db, [r.id for r in rows])
+    for row in rows:
+        row.has_open_redye = row.id in open_vat_ids
+    return rows
 
 
 @router.post("", response_model=VatOut, status_code=status.HTTP_201_CREATED)
@@ -61,6 +66,7 @@ def get_vat(
     item = db.query(Vat).filter(Vat.id == vat_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="染缸不存在")
+    item.has_open_redye = redye.vat_has_open_ticket(db, item.id)
     return item
 
 
@@ -87,6 +93,7 @@ def update_vat(
         db.rollback()
         raise HTTPException(status_code=400, detail="同坊染缸编号已存在")
     db.refresh(item)
+    item.has_open_redye = redye.vat_has_open_ticket(db, item.id)
     return item
 
 
@@ -105,6 +112,7 @@ def drain_vat(
     item.status = "drain"
     db.commit()
     db.refresh(item)
+    item.has_open_redye = redye.vat_has_open_ticket(db, item.id)
     return item
 
 

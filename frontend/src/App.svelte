@@ -10,6 +10,7 @@
   import Vats from './routes/Vats.svelte';
   import DyeLots from './routes/DyeLots.svelte';
   import FastnessChecks from './routes/FastnessChecks.svelte';
+  import RedyeTickets from './routes/RedyeTickets.svelte';
 
   const requireAuth = () => !!get(token);
 
@@ -20,6 +21,7 @@
     '/vats': wrap({ component: Vats, conditions: [requireAuth] }),
     '/lots': wrap({ component: DyeLots, conditions: [requireAuth] }),
     '/checks': wrap({ component: FastnessChecks, conditions: [requireAuth] }),
+    '/redye': wrap({ component: RedyeTickets, conditions: [requireAuth] }),
   };
 
   function onConditionsFailed() {

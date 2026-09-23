@@ -142,6 +142,7 @@
         <th>纤维</th>
         <th>容量 L</th>
         <th>状态</th>
+        <th>回修复染</th>
         <th></th>
       </tr>
     </thead>
@@ -154,6 +155,13 @@
           <td>{row.fiberType}</td>
           <td>{row.capacityL}</td>
           <td><span class="badge {row.status}">{VAT_STATUS[row.status] || row.status}</span></td>
+          <td>
+            {#if row.hasOpenRedye}
+              <span class="badge redye">未结案复染</span>
+            {:else}
+              <span class="muted">—</span>
+            {/if}
+          </td>
           <td class="row-actions">
             {#if row.status !== 'drain'}
               <button class="btn ghost small" type="button" on:click={() => drain(row.id)}>完成排液</button>

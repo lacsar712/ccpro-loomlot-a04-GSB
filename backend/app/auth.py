@@ -55,3 +55,10 @@ def get_current_user(
     if not user:
         raise credentials_exception
     return user
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """仅染坊主管（admin）可通过，用于复染单结案等收口操作。"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="仅主管可执行该操作")
+    return current_user

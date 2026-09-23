@@ -5,6 +5,7 @@ from app.database import SessionLocal
 from app.models.dye_house import DyeHouse
 from app.models.dye_lot import DyeLot
 from app.models.fastness_check import FastnessCheck
+from app.models.redye_ticket import RedyeTicket
 from app.models.user import User
 from app.models.vat import Vat
 
@@ -99,13 +100,22 @@ def seed() -> None:
             v3.status = "ready"
             db.add_all(
                 [
+                    # lot1 双检：较旧 3 级、较新 4 级，耐洗未回落，满足复染结案条件
+                    FastnessCheck(
+                        dye_lot_id=lot1.id,
+                        checked_at=now - timedelta(hours=5),
+                        wash_fastness=3,
+                        rub_fastness=3.0,
+                        temp_c=42.0,
+                        notes="初检偏浅",
+                    ),
                     FastnessCheck(
                         dye_lot_id=lot1.id,
                         checked_at=now - timedelta(hours=1),
                         wash_fastness=4,
                         rub_fastness=3.5,
                         temp_c=40.0,
-                        notes="湿摩略偏，可出货",
+                        notes="复检达标，可出货",
                     ),
                     FastnessCheck(
                         dye_lot_id=lot2.id,
@@ -116,6 +126,18 @@ def seed() -> None:
                         notes=None,
                     ),
                 ]
+            )
+            db.flush()
+
+            # 种子：一张未结案回修复染单，挂原染程 lot1（锁定染缸 V-01）
+            db.add(
+                RedyeTicket(
+                    dye_lot_id=lot1.id,
+                    defect_desc="左幅色花且边中色差超标，需回修复染",
+                    opened_at=now - timedelta(minutes=40),
+                    closed_at=None,
+                    opener_name="染程操作员",
+                )
             )
             db.commit()
             print("Seed data inserted.")
