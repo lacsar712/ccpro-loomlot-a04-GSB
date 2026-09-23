@@ -12,6 +12,7 @@ from app.models.fastness_check import FastnessCheck
 from app.models.user import User
 from app.models.vat import Vat
 from app.schemas.dashboard import DashboardStats
+from app.services import rework as rework_service
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -38,4 +39,5 @@ def get_stats(
             .scalar()
             or 0
         ),
+        open_rework_count=rework_service.open_count(db),
     )

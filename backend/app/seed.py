@@ -5,6 +5,7 @@ from app.database import SessionLocal
 from app.models.dye_house import DyeHouse
 from app.models.dye_lot import DyeLot
 from app.models.fastness_check import FastnessCheck
+from app.models.rework_ticket import ReworkTicket
 from app.models.user import User
 from app.models.vat import Vat
 
@@ -116,6 +117,19 @@ def seed() -> None:
                         notes=None,
                     ),
                 ]
+            )
+            db.flush()
+
+            # 一单未结案回修复染：挂在 lot1（V-01）上，该缸在结案前禁止再开新染程。
+            # 结案需原染程复检两条且较新耐洗不低于较旧，当前仅一条抽检，故保持未结案。
+            db.add(
+                ReworkTicket(
+                    dye_lot_id=lot1.id,
+                    defect_note="左幅色花且耐洗不稳，需回修复染",
+                    opened_at=now - timedelta(minutes=40),
+                    closed_at=None,
+                    opener_name="染程操作员",
+                )
             )
             db.commit()
             print("Seed data inserted.")

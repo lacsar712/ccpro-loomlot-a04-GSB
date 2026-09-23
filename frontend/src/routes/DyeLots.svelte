@@ -18,7 +18,9 @@
     error = '';
     try {
       [vats, rows] = await Promise.all([api('/vats'), api('/dye-lots')]);
-      const usable = vats.filter((v) => v.status === 'ready' || v.status === 'dyeing');
+      const usable = vats.filter(
+        (v) => (v.status === 'ready' || v.status === 'dyeing') && !v.hasOpenRework
+      );
       if (!form.vatId && usable.length) form.vatId = String(usable[0].id);
       else if (!form.vatId && vats.length) form.vatId = String(vats[0].id);
     } catch (e) {
@@ -86,7 +88,9 @@
 </script>
 
 <h1 class="page-title">染程</h1>
-<p class="page-sub">仅 ready / dyeing 染缸可开缸；提交后染缸自动变为染色中。</p>
+<p class="page-sub">
+  仅 ready / dyeing 染缸可开缸；提交后染缸自动变为染色中。染缸挂未结案回修复染时禁止再开新染程，结案后恢复。
+</p>
 
 <div class="panel" style="margin-bottom:1rem;">
   <div class="form-grid">
@@ -94,8 +98,10 @@
       >染缸
       <select bind:value={form.vatId}>
         {#each vats as v}
-          <option value={String(v.id)}
-            >{v.vatCode} · {VAT_STATUS[v.status] || v.status} · {v.fiberType}</option
+          <option value={String(v.id)} disabled={v.hasOpenRework}
+            >{v.vatCode} · {VAT_STATUS[v.status] || v.status} · {v.fiberType}{v.hasOpenRework
+              ? ' · 未结案复染冻结'
+              : ''}</option
           >
         {/each}
       </select>
@@ -124,6 +130,7 @@
         <th>布料 kg</th>
         <th>开始</th>
         <th>操作员</th>
+        <th>复染</th>
         <th></th>
       </tr>
     </thead>
@@ -136,6 +143,13 @@
           <td>{row.fabricKg}</td>
           <td>{new Date(row.startedAt).toLocaleString()}</td>
           <td>{row.operatorName}</td>
+          <td>
+            {#if row.hasOpenRework}
+              <span class="badge rework">挂未结案复染</span>
+            {:else}
+              <span class="muted">—</span>
+            {/if}
+          </td>
           <td class="row-actions">
             <button class="btn ghost small" type="button" on:click={() => startEdit(row)}>编辑</button>
             <button class="btn danger small" type="button" on:click={() => remove(row.id)}>删除</button>

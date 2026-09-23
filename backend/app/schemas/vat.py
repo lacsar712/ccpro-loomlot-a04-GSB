@@ -34,3 +34,4 @@ class VatOut(BaseModel):
     fiber_type: str = Field(serialization_alias="fiberType")
     capacity_l: float = Field(serialization_alias="capacityL")
     status: VatStatus
+    has_open_rework: bool = Field(default=False, serialization_alias="hasOpenRework")

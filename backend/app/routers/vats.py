@@ -10,6 +10,7 @@ from app.models.dye_house import DyeHouse
 from app.models.user import User
 from app.models.vat import Vat
 from app.schemas.vat import VatCreate, VatUpdate, VatOut
+from app.services import rework as rework_service
 
 router = APIRouter(prefix="/api/vats", tags=["vats"])
 
@@ -23,7 +24,7 @@ def list_vats(
     q = db.query(Vat)
     if dye_house_id is not None:
         q = q.filter(Vat.dye_house_id == dye_house_id)
-    return q.order_by(Vat.id).all()
+    return rework_service.annotate_vats(db, q.order_by(Vat.id).all())
 
 
 @router.post("", response_model=VatOut, status_code=status.HTTP_201_CREATED)
@@ -49,7 +50,7 @@ def create_vat(
         db.rollback()
         raise HTTPException(status_code=400, detail="同坊染缸编号已存在")
     db.refresh(item)
-    return item
+    return rework_service.annotate_vats(db, [item])[0]
 
 
 @router.get("/{vat_id}", response_model=VatOut)
@@ -61,7 +62,7 @@ def get_vat(
     item = db.query(Vat).filter(Vat.id == vat_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="染缸不存在")
-    return item
+    return rework_service.annotate_vats(db, [item])[0]
 
 
 @router.put("/{vat_id}", response_model=VatOut)
@@ -87,7 +88,7 @@ def update_vat(
         db.rollback()
         raise HTTPException(status_code=400, detail="同坊染缸编号已存在")
     db.refresh(item)
-    return item
+    return rework_service.annotate_vats(db, [item])[0]
 
 
 @router.post("/{vat_id}/drain", response_model=VatOut)
@@ -105,7 +106,7 @@ def drain_vat(
     item.status = "drain"
     db.commit()
     db.refresh(item)
-    return item
+    return rework_service.annotate_vats(db, [item])[0]
 
 
 @router.delete("/{vat_id}", status_code=status.HTTP_204_NO_CONTENT)
